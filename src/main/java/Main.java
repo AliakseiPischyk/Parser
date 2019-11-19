@@ -9,31 +9,53 @@ import java.util.List;
 
 public class Main {
 
-    List<String> getUrlsOfGoods(Elements elements) {
-        List<String> ret = new ArrayList<String>(elements.size());
-        for (Element each : elements){
+    public static List<String> getUrlsOfGoods(Document document) {
+        Elements links = document.select(".b-teaser");
+        List<String> ret = new ArrayList<String>(links.size());
+        for (Element each : links) {
             ret.add(each.child(1).attr("href"));
         }
         return ret;
     }
-    String getLinkOnNextPage(){
-        return null;
-    }
 
-    int getLastPageIdx(Document document){
+    public static int getLastPageIdx(Document document){
         Elements linksToPages = document.select(".b-pagination__item");
         return  Integer.valueOf(linksToPages.get(linksToPages.size()-2).child(0).attr("data-page"));
     }
 
-    public static void main(String[] args) throws IOException {
-        Document document = Jsoup.connect("https://letyshops.com/by/shops").get();
-        //Elements elements = document.select("[id]");
-        Elements links = document.select(".b-teaser");
-        Elements linksToPages = document.select(".b-pagination__item");
-        Element pageWithLastIndex = linksToPages.get(linksToPages.size()-2);
-        String lastPageNum = pageWithLastIndex.child(0).attr("data-page");
-        System.out.println("debug");
+    public static List<String> enumPages(String url, List<Integer> indices){
+        List<String> ret = new ArrayList<String>(indices.size());
+        for(int idx: indices)
+        {
+            ret.add(url + idx);
+        }
+        return ret;
     }
+
+    public static String getDiscountInfo(Document document){
+        return document.select(".b-shop-teaser__cash-value-row").select("span").text();
+    }
+
+    public static String getShopName(Document document){
+        return document.select(".container").get(2).child(0).child(0).child(2).text();
+    }
+
+    public static List<String> getConditions(Document document){
+        Elements ass = document.select(".b-module-info--conditions").get(0).children();
+        List<String> conditions = new ArrayList<String>();
+        for(Element condition : ass){
+            conditions.add(condition.text());
+        }
+        return conditions;
+    }
+
+    public static void main(String[] args) throws IOException {
+        Document doc = Jsoup.connect("https://letyshops.com/by/shops/lamoda-by").get();
+        System.out.println(getConditions(doc));
+        System.out.println(getShopName(doc) + " " + getDiscountInfo(doc));
+    }
+
+
 
 
 }
